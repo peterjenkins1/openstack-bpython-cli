@@ -11,8 +11,6 @@ from novaclient import utils
 import os
 
 # Consume standard OpenStack environment variables.
-# This is mainly only useful for ad-hoc command line operation as
-# in playbooks one would assume variables would be used appropriately
 OS_AUTH_URL=os.environ.get('OS_AUTH_URL', 'http://127.0.0.1:35357/v2.0/')
 OS_PASSWORD=os.environ.get('OS_PASSWORD', None)
 OS_REGION_NAME=os.environ.get('OS_REGION_NAME', None)
