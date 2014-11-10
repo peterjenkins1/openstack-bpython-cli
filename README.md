@@ -1,11 +1,7 @@
 openstack-bpython-cli
 =====================
 
-Quick hack for exploring the nova python API using bpython
-
-Code to get the credentials from the enviroment shamelessly listed from:
-
-https://github.com/ansible/ansible/blob/devel/lib/ansible/module_utils/openstack.py
+Quick hack for exploring the neutron, glance, keystone and nova python APIs using bpython
 
 Example:
 
