@@ -5,9 +5,14 @@ import bpdb
 
 # OpenStack libraries
 import keystoneclient.v2_0.client as keystoneclient
-from neutronclient import client as neutronclient
 from novaclient.v1_1 import client as novaclient
 from novaclient import utils
+import glanceclient
+
+#import neutronclient
+#import neutronclient.common
+#import neutronclient.neutron.v2_0
+from neutronclient.neutron import client as neutronclient
 
 # For reading environment varibles
 import os
@@ -36,14 +41,24 @@ keystone_creds = get_keystone_creds()
 
 # Try to connect to all the clients
 try:
+    print 'Connecting to nova'
     nova = novaclient.Client(**nova_creds)
-    keystone = keystoneclient.Client(**keystone_creds)
-#    neutron = neutronclient.Client(**creds)
-
-    # This should fail if we don't have a working connection
     nova.authenticate()
+
+    print 'Connecting to keystone'
+    keystone = keystoneclient.Client(**keystone_creds)
     keystone.authenticate()
-#    neutron.authenticate()
+
+    print 'Connecting to glance'
+    glance_endpoint = keystone.service_catalog.url_for(service_type='image',
+                                                       endpoint_type='publicURL')
+    glance = glanceclient.Client('2',glance_endpoint, token=keystone.auth_token)
+
+    print 'Connecting to neutron'
+    #quantumurl = keystone.endpoints.find(service_id=keystone.services.find(name="quantum").id).publicurl
+    neutron_endpoint = keystone.service_catalog.url_for(service_type='network',
+                                                        endpoint_type='publicURL')
+    neutron = neutronclient.Client('2.0',endpoint_url=neutron_endpoint, token=keystone.auth_token)
 
 except Exception as e:
     print e
