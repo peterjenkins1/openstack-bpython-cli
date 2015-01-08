@@ -8,10 +8,8 @@ import keystoneclient.v2_0.client as keystoneclient
 from novaclient.v1_1 import client as novaclient
 from novaclient import utils
 import glanceclient
-
-#import neutronclient
-#import neutronclient.common
-#import neutronclient.neutron.v2_0
+import cinderclient.exceptions
+import cinderclient.v1.client as cinder
 from neutronclient.neutron import client as neutronclient
 
 # For reading environment varibles
@@ -55,10 +53,12 @@ try:
     glance = glanceclient.Client('2',glance_endpoint, token=keystone.auth_token)
 
     print 'Connecting to neutron'
-    #quantumurl = keystone.endpoints.find(service_id=keystone.services.find(name="quantum").id).publicurl
     neutron_endpoint = keystone.service_catalog.url_for(service_type='network',
                                                         endpoint_type='publicURL')
     neutron = neutronclient.Client('2.0',endpoint_url=neutron_endpoint, token=keystone.auth_token)
+    print 'Connecting to cinder'
+    cinder = cinder.Client(**nova_creds)
+    cinder.authenticate()
 
 except Exception as e:
     print e
