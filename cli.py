@@ -9,7 +9,7 @@ from novaclient.v1_1 import client as novaclient
 from novaclient import utils
 import glanceclient
 import cinderclient.exceptions
-import cinderclient.v1.client as cinder
+from cinderclient.v1 import client as cinderclient
 from neutronclient.neutron import client as neutronclient
 
 # For reading environment varibles
@@ -50,12 +50,20 @@ def get_nova_creds():
     d['service_type'] = 'compute'
     return d
 
+def get_cinder_creds():
+    d = {}
+    d['username'] = os.environ['OS_USERNAME']
+    d['api_key'] = os.environ['OS_PASSWORD']
+    d['auth_url'] = os.environ['OS_AUTH_URL']
+    d['project_id'] = os.environ['OS_TENANT_NAME']
+    return d
+
 def debug(level=logging.DEBUG):
   logging.basicConfig(level=level)
+  logging.captureWarnings(True)
 
 def help_me():
   print(help_text)
-
 
 # Read OpenStack environment variables
 nova_creds = get_nova_creds()
@@ -80,7 +88,9 @@ neutron_endpoint = keystone.service_catalog.url_for(service_type='network',
                                                     endpoint_type='publicURL')
 neutron = neutronclient.Client('2.0',endpoint_url=neutron_endpoint, token=keystone.auth_token)
 print 'Connecting to cinder'
-cinder = cinder.Client(**nova_creds)
+cinder_endpoint = keystone.service_catalog.url_for(service_type='volume',
+                                                   endpoint_type='publicURL')
+cinder = cinderclient.Client(**get_cinder_creds())
 cinder.authenticate()
 
 help_me()
