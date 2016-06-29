@@ -5,7 +5,7 @@ import bpdb
 
 # OpenStack libraries
 from keystoneclient.v2_0 import client as keystoneclient
-from novaclient.v1_1 import client as novaclient
+from novaclient import client as novaclient
 from novaclient import utils
 import glanceclient
 import cinderclient.exceptions
@@ -20,10 +20,12 @@ import logging
 
 class pyos_connect:
 
-  def __init__(self):
+  def __init__(self, insecure=False):
 
     self.log = logging.getLogger(__name__)
     self.log.debug('Read openstack credentials from environment')
+
+    self.insecure = insecure
 
     ''' Read all the openstack credentials from the users environment '''
     self.username = os.environ['OS_USERNAME']
@@ -46,9 +48,10 @@ class pyos_connect:
       nova_creds['api_key'] = self.password
       nova_creds['project_id'] = self.tenant_name
       nova_creds['service_type'] = 'compute'
+      nova_creds['insecure'] = self.insecure
 
       logging.info('Connecting to nova')
-      self.nova = novaclient.Client(**nova_creds)
+      self.nova = novaclient.Client(2, **nova_creds)
       self.nova.authenticate()
       logging.info('Successfully authenticated to nova')
 
@@ -59,6 +62,7 @@ class pyos_connect:
       keystone_creds = self.common_creds.copy()
       keystone_creds['password'] = self.password
       keystone_creds['tenant_name'] = self.tenant_name
+      keystone_creds['insecure'] = self.insecure
 
       logging.info('Connecting to keystone')
       self.keystone = keystoneclient.Client(**keystone_creds)
@@ -74,7 +78,8 @@ class pyos_connect:
       glance_endpoint = self.keystone.service_catalog.url_for(service_type='image',
                                                               endpoint_type='publicURL')
       self.glance = glanceclient.Client('2',glance_endpoint,
-                                       token=self.keystone.auth_token)
+                                       token=self.keystone.auth_token,
+                                       insecure=self.insecure)
       logging.info('Successfully authenticated to glance')
 
     return self.glance
@@ -85,7 +90,8 @@ class pyos_connect:
       logging.info('Connecting to neutron')
       neutron_endpoint = self.keystone.service_catalog.url_for(service_type='network',
                                                                endpoint_type='publicURL')
-      self.neutron = neutronclient.Client('2.0', endpoint_url=neutron_endpoint, token=self.keystone.auth_token)
+      self.neutron = neutronclient.Client('2.0', endpoint_url=neutron_endpoint,
+                     token=self.keystone.auth_token, insecure=self.insecure)
       logging.info('Successfully authenticated to neutron')
 
     return self.neutron
@@ -96,6 +102,7 @@ class pyos_connect:
       cinder_creds = self.common_creds.copy()
       cinder_creds['api_key'] = self.password
       cinder_creds['project_id'] = self.tenant_name
+      cinder_creds['insecure'] = self.insecure
 
       logging.info('Connecting to cinder')
       '''

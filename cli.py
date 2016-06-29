@@ -9,6 +9,9 @@ import bpdb
 # To see errors from the libraries
 import logging
 
+# To handle CLI args
+import argparse
+
 help_text = '''OpenStack bpython cli
 
 Commands:
@@ -30,7 +33,12 @@ def debug(level=logging.DEBUG):
 def help_me():
   print(help_text)
 
-os = pyos_connect.pyos_connect()
+parser = argparse.ArgumentParser(description='Connect to OpenStack and explore the python API bindings')
+parser.add_argument('--insecure', dest='insecure', action='store_true')
+args = parser.parse_args()
+
+# Connect and get handles to all services
+os = pyos_connect.pyos_connect(args.insecure)
 nova = os.get_nova()
 glance = os.get_glance()
 keystone = os.get_keystone()
