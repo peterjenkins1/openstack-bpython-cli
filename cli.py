@@ -35,15 +35,18 @@ def help_me():
 
 parser = argparse.ArgumentParser(description='Connect to OpenStack and explore the python API bindings')
 parser.add_argument('--insecure', dest='insecure', action='store_true')
+parser.add_argument('--debug', '-d', dest='debug', action='store_true')
 args = parser.parse_args()
 
+if args.debug: debug()
+
 # Connect and get handles to all services
-os = pyos_connect.pyos_connect(args.insecure)
+os = pyos_connect.pyos_connect(verify=not args.insecure)
 nova = os.get_nova()
 glance = os.get_glance()
 keystone = os.get_keystone()
 cinder = os.get_cinder()
-neuton = os.get_neutron()
+neutron = os.get_neutron()
 
 help_me()
 
