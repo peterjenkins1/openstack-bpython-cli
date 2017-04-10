@@ -35,6 +35,7 @@ Usage:
 Installation:
 
  - You need a working OpenStack environment and the command linke tools. This is beyond the scope of this README, but see:  http://docs.openstack.org/cli-reference/common/cli_install_openstack_command_line_clients.html
+ - *Use keystone v3 endpoint*
  - Install/setup bpython: https://github.com/bpython/bpython/
  - Clone this repo
  - Run 'cli.py'
